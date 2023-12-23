@@ -1,3 +1,17 @@
+# Fork for benchmarking dist attention
+## Setup
+DGX-A100
+
+pytorch   2.0.1 py3.9_cuda11.8_cudnn8.7.0_0  
+pytorch-cuda              11.8  
+triton                    2.1.0
+
+## Result
+```bash
+bash run.sh
+```
+
+# Below is the original readme
 # LightSeq: Sequence Level Parallelism for Distributed Training of Long Context Transformers
 Official repository for LightSeq: Sequence Level Parallelism for Distributed Training of Long Context Transformers. LightSeq achieves up to 2x faster, 2-8x longer sequences vs Megatron-LM on 16 80GB A100s.
 
