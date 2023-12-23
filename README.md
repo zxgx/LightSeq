@@ -1,12 +1,29 @@
 # Fork for benchmarking dist attention
+## Notation
+- `s` sequence length
+- `b` (micro) batch size
+- `h` hidden size
+- `n` number of attention head
+- `d` size of each attention head
+## Principle
+For an input activation of shape: `[s, b, h]`,  the QKV linear projects and splits it into three tensors of shape
+`s, b, n, d`.
+
+To enable sequence parallelism for attention, two dimensions can be taken into consideration.
+Megatron-LM and Deepspeed partition at `n` and their computations are done by `FlashAttn`. By contrast, `DistAttn` of this repo, along with some other solutions partitions at `s`. To collect the results, some communication are necessary.
+`DistAttn` is a neat solution partitioning at `s`, as it provides some optimization for the causal attention and typical overlapping.
+
+This fork performs a **CLEAN** comparison against this two types of solutions.
+Given an activation `[s, b, h]` and the degree of sequence parallelism `p`, I collect the duration of `FlashAttn` computing `[s, b, n/p, d]` and that of `DistAttn` computing `[s/p, b, n, d]`.
+
 ## Setup
 DGX-A100
 
-pytorch   2.0.1 py3.9_cuda11.8_cudnn8.7.0_0  
-pytorch-cuda              11.8  
-triton                    2.1.0
+- pytorch   2.0.1 py3.9_cuda11.8_cudnn8.7.0_0  
+- pytorch-cuda              11.8  
+- triton                    2.1.0
 
-## Result
+## Result :sweat_smile:
 ```bash
 bash run.sh
 ```
