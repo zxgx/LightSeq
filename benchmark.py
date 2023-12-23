@@ -9,11 +9,9 @@ from lightseq.async_communication import initialize_distributed,\
         get_sequence_parallel_group
 
 
-def benchmark_flash_attn(batch_size, seq_length, num_head, head_dim):
-    # batch_size = [1]
-    # seq_len = [8*1024, 16*1024, 32*1024, 64*1024, 128*1024]
-    # # corresponds to 30B, 7B, 1.3B
-    # head_and_dim = [(16, 96), (8, 128), (4, 128)]
+def benchmark_flash_attn(world_size, batch_size, seq_length, num_head, head_dim):
+    assert num_head % world_size == 0
+    num_head = num_head // world_size
     
     dtype = torch.float16
     device = torch.cuda.current_device()
@@ -131,7 +129,9 @@ def benchmark_dist_attn(batch_size, seq_length, num_head, head_dim):
 
 
 if __name__ == "__main__":
+    import os
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--kernel', type=str, choices=['flash', 'dist'], required=True)
     parser.add_argument('--batch_size', type=int, required=True)
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.kernel == 'flash':
-        benchmark_flash_attn(args.batch_size, args.seq_length, args.num_head, args.head_dim)
+        benchmark_flash_attn(int(os.getenv('WORLD_SIZE')), args.batch_size, args.seq_length, args.num_head, args.head_dim)
     
     elif args.kernel == 'dist':
         benchmark_dist_attn(args.batch_size, args.seq_length, args.num_head, args.head_dim)
